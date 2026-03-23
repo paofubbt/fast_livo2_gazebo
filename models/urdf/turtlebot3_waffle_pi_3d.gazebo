@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="turtlebot3_waffle_pi_3d">
+
+  <!-- Gazebo差分驱动插件 -->
+  <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <namespace>/</namespace>
+      </ros>
+      <robot_namespace>/</robot_namespace>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>true</publish_wheel_tf>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>0.2</wheel_separation>
+      <wheel_diameter>0.1</wheel_diameter>
+      <wheel_acceleration>0.005</wheel_acceleration>
+      <wheel_torque>0.05</wheel_torque>
+      <!-- 注意：已删除 odometry_source -->
+      <command_topic>cmd_vel</command_topic>
+      <odometry_topic>odom</odometry_topic>
+      <publish_odometry_msg>true</publish_odometry_msg>
+    </plugin>
+  </gazebo>
+
+  <!-- 3D雷达传感器 -->
+  <gazebo reference="velodyne_link">
+    <sensor type="ray" name="velodyne_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1.0</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>16</samples>
+            <resolution>1.0</resolution>
+            <min_angle>-0.261799</min_angle>
+            <max_angle>0.261799</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.1</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <!-- 【关键修复】已删除整个 <noise> 标签块 -->
+      </ray>
+      <plugin name="gazebo_ros_laser" filename="libgazebo_ros_ray_sensor.so">
+        <output_type>sensor_msgs/PointCloud2</output_type>
+        <output_topic>/velodyne_points</output_topic>
+        <frame_name>velodyne_link</frame_name>
+        <radiation_type>infrared</radiation_type>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- 相机传感器 -->
+  <gazebo reference="left_camera_link">
+    <sensor type="camera" name="left_camera_sensor">
+      <update_rate>30.0</update_rate>
+      <camera name="left_camera">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <!-- 【关键修复】已删除相机的 <noise> 标签块 -->
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <ros>
+          <namespace>/</namespace>
+        </ros>
+        <camera_name>left_camera</camera_name>
+        <frame_name>left_camera_link</frame_name>
+        <hack_baseline>0.07</hack_baseline>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- IMU传感器 -->
+  <gazebo reference="imu_link">
+    <sensor type="imu" name="imu_sensor">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>~/out:=imu</remapping>
+        </ros>
+        <initial_orientation_as_reference>false</initial_orientation_as_reference>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!--前支撑轮：全向滚动球体物理属性 -->
+  <gazebo reference="front_caster_wheel">
+    <mu1>0.01</mu1>  <!-- 极低的滑动摩擦 -->
+    <mu2>0.01</mu2>
+    <fdir1>1 0 0</fdir1>
+    <kp>1000000.0</kp>
+    <kd>1000.0</kd>
+    <!-- 设置滚动摩擦为0，让球体自由滚动 -->
+    <rollingFriction>0.0</rollingFriction>
+    <maxContacts>10</maxContacts>
+  </gazebo>
+
+</robot>

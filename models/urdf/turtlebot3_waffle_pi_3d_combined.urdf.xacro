@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<robot name="turtlebot3_waffle_pi_3d" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- 包含机器人描述 -->
+  <xacro:include filename="turtlebot3_waffle_pi_3d_complete.urdf.xacro" />
+  
+  <!-- 包含Gazebo插件 -->
+  <xacro:include filename="turtlebot3_waffle_pi_3d.gazebo" />
+
+</robot>

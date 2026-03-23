@@ -1,0 +1,90 @@
+/**:
+  ros__parameters:
+    common:
+      img_topic: "/left_camera/image_raw"  # 确保与重发布后的图像话题一致
+      lid_topic: "/gazebo_ros_laser/out"    # 激光雷达话题
+      imu_topic: "/imu"                     # IMU话题
+      img_en: 1                             # ✅ 关键：开启视觉前端 (1=启用)
+      lidar_en: 1                           # 开启激光雷达
+      ros_driver_bug_fix: false
+
+    extrin_calib:
+      # 假设仿真中相机、IMU、雷达近似对齐，无大位移。请根据Gazebo模型调整！
+      extrinsic_T: [0.15, 0.0, 0.06]        # 雷达到IMU的平移 (x, y, z) 米
+      extrinsic_R: [1.0, 0.0, 0.0,          # 雷达到IMU的旋转矩阵 (行优先)
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0]
+      # 相机到雷达的外参 (Rcl: 旋转, Pcl: 平移)。此处为示例，需标定！
+      # 以下是类似官方MARS_LVIG的HKisland外参，仿真中可能需要调整
+      Rcl: [0.00438814, -0.999807, -0.0191582,
+            -0.00978695, 0.0191145, -0.999769,
+            0.999942, 0.00457463, -0.00970118]
+      Pcl: [0.016069, 0.0871753, -0.0718021]
+
+    time_offset: 
+      imu_time_offset: 0.0
+      img_time_offset: 0.0  # 仿真中时间通常对齐，设为0。若不同步，需微调。
+      exposure_time_init: 0.0
+
+    preprocess:
+      point_filter_num: 1
+      filter_size_surf: 0.2
+      lidar_type: 2        # 仿真中常用2 (VELODYNE 16线)
+      scan_line: 16        # 对应16线
+      blind: 0.1           # 忽略近距离点云
+
+    # ==================== VIO 核心参数 ====================
+    vio:
+      max_iterations: 5
+      outlier_threshold: 1000  # 异常值剔除阈值，可调
+      img_point_cov: 100       # 图像点协方差，影响权重
+      patch_size: 8            # 用于光流跟踪的图像块大小
+      patch_pyrimid_level: 4   # 图像金字塔层数
+      normal_en: true          # 使用法向量约束
+      raycast_en: false        # 仿真中可关闭射线投射
+      inverse_composition_en: false
+      exposure_estimate_en: false # 仿真中通常关闭曝光估计
+      inv_expo_cov: 0.1
+    # =====================================================
+
+    imu:
+      imu_en: true
+      imu_int_frame: 30
+      acc_cov: 0.5
+      gyr_cov: 0.3
+      b_acc_cov: 0.0001
+      b_gyr_cov: 0.0001
+
+    lio:
+      max_iterations: 5
+      dept_err: 0.02
+      beam_err: 0.05
+      min_eigen_value: 0.0025
+      voxel_size: 0.5
+      max_layer: 2
+      max_points_num: 50
+      layer_init_num: [5,5,5,5,5]
+
+    local_map:  
+      map_sliding_en: true    # 使用滑动窗口地图
+      half_map_size: 100
+      sliding_thresh: 8.0
+
+    uav:
+      imu_rate_odom: false
+      gravity_align_en: false
+
+    publish:
+      dense_map_en: true
+      pub_effect_point_en: true  # 发布有效点用于调试
+      pub_plane_en: false
+      pub_scan_num: 1
+      blind_rgb_points: 0.0
+
+    evo:
+      seq_name: "simulation"
+      pose_output_en: false
+
+    pcd_save:
+      pcd_save_en: false
+      colmap_output_en: false

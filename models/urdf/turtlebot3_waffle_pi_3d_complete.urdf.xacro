@@ -1,0 +1,240 @@
+<?xml version="1.0"?>
+<robot name="turtlebot3_waffle_pi_3d" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- 基本底盘 -->
+  <link name="base_footprint"/>
+
+  <link name="base_link">
+    <inertial>
+      <mass value="5.0" />
+      <origin xyz="0 0 0.02" />
+      <inertia ixx="0.3" ixy="0" ixz="0" iyy="0.3" iyz="0" izz="0.5" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.2 0.2 0.1" />
+      </geometry>
+      <material name="Blue">
+        <color rgba="0 0 0.8 1" />
+      </material>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.2 0.2 0.1" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <origin xyz="0 0 0.05" rpy="0 0 0" />
+    <parent link="base_footprint" />
+    <child link="base_link" />
+  </joint>
+
+  <!-- 左轮（驱动轮） -->
+  <link name="left_wheel">
+    <inertial>
+      <mass value="0.3" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder length="0.02" radius="0.05" />
+      </geometry>
+      <material name="Black">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder length="0.02" radius="0.05" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <origin xyz="-0.05 0.1 -0.05" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="left_wheel" />
+    <axis xyz="0 1 0" />
+  </joint>
+
+  <!-- 右轮（驱动轮） -->
+  <link name="right_wheel">
+    <inertial>
+      <mass value="0.3" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder length="0.02" radius="0.05" />
+      </geometry>
+      <material name="Black">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder length="0.02" radius="0.05" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <origin xyz="-0.05 -0.1 -0.05" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="right_wheel" />
+    <axis xyz="0 1 0" />
+  </joint>
+
+  <!-- ========================================== -->
+  <!-- 前支撑轮：修复版 - 光滑万向球 -->
+  <!-- ========================================== -->
+  <link name="front_caster_wheel">
+    <inertial>
+      <mass value="0.1" /> <!-- 增加质量，提高稳定性 -->
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.05" />
+      </geometry>
+      <material name="White">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    
+    <!-- 【关键】碰撞体也使用球体 -->
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.05" />
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- 【关键】使用ball关节实现真正的全向旋转 -->
+  <joint name="front_caster_joint" type="continuous">
+    <origin xyz="0.12 0 -0.05" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="front_caster_wheel" />
+    <!-- 允许绕任意轴旋转 -->
+    <axis xyz="1 0 0" />
+  </joint>
+  <!-- ========================================== -->
+
+
+  <!-- 3D雷达 -->
+  <link name="velodyne_link">
+    <inertial>
+      <mass value="0.01" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.1" radius="0.05" />
+      </geometry>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1" />
+      </material>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.1" radius="0.05" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="velodyne_joint" type="fixed">
+    <origin xyz="0.1 0 0.16" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="velodyne_link" />
+  </joint>
+
+  <!-- 左相机 -->
+  <link name="left_camera_link">
+    <inertial>
+      <mass value="0.005" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 0.05" />
+      </geometry>
+      <material name="Red">
+        <color rgba="1 0 0 1" />
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 0.05" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="left_camera_joint" type="fixed">
+    <origin xyz="0.12 0 0.06" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="left_camera_link" />
+  </joint>
+
+  <!-- IMU -->
+  <link name="imu_link">
+    <inertial>
+      <mass value="0.01" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001" />
+    </inertial>
+    
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.02 0.02" />
+      </geometry>
+      <material name="Green">
+        <color rgba="0 1 0 1" />
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.02 0.02" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <origin xyz="0.0 0 0.1" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="imu_link" />
+  </joint>
+
+</robot>
